@@ -4,16 +4,12 @@ use crate::component::ApplicationMessages;
 use crate::native::notifyicon::{NotifyIcon as NativeIcon, NotifyIconEvent, Rect as IconRect};
 
 windows_core::link!("shcore.dll" "system" fn GetDpiForMonitor(monitor: HMONITOR, dpi_type: i32, dpi_x: *mut u32, dpi_y: *mut u32) -> HRESULT);
-windows_core::link!("user32.dll" "system" fn GetCursorPos(point: *mut POINT) -> windows_core::BOOL);
 
 // Matches Explorer's ContextMenuMargin resource in SystemTrayResources.xbf.
 const CONTEXT_MENU_MARGIN_DIP: u32 = 12;
 const FLYOUT_MARGIN_DIP: u32 = 4;
 
-fn tray_menu_placement(
-    icon: IconRect,
-    position: notifyicon::Point,
-) -> (ScreenPoint, MenuPlacement) {
+fn tray_menu_placement(icon: IconRect) -> (ScreenPoint, MenuPlacement) {
     let rect = RECT {
         left: icon.left,
         top: icon.top,
@@ -60,31 +56,31 @@ fn tray_menu_placement(
         .unwrap()
         .0;
 
-    // A hidden icon may report the overflow button's rectangle. The WM_CONTEXTMENU
-    // coordinates are undocumented, so use them only when they match the cursor
-    // over the overflow flyout, rather than moving a keyboard-opened menu there.
-    let mut cursor = POINT::default();
-    if unsafe { GetCursorPos(&mut cursor) }.as_bool()
-        && cursor.x >= work.left
-        && cursor.x < work.right
-        && cursor.y >= work.top
-        && cursor.y < work.bottom
-        && !(cursor.x >= rect.left
-            && cursor.x < rect.right
-            && cursor.y >= rect.top
-            && cursor.y < rect.bottom)
-        && (i64::from(cursor.x) - i64::from(position.x)).abs() <= 8
-        && (i64::from(cursor.y) - i64::from(position.y)).abs() <= 8
+    // An icon in the overflow flyout is inside the work area, unlike an icon
+    // on the taskbar. Place its menu beside the icon itself.
+    if rect.left >= work.left
+        && rect.right <= work.right
+        && rect.top >= work.top
+        && rect.bottom <= work.bottom
     {
-        return (
-            ScreenPoint::new(position.x, position.y),
-            match edge {
-                0 => MenuPlacement::AboveAnchor,
-                1 => MenuPlacement::BelowAnchor,
-                2 => MenuPlacement::RightOfAnchor,
-                _ => MenuPlacement::LeftOfAnchor,
-            },
-        );
+        return match edge {
+            0 => (
+                ScreenPoint::new(center_x, rect.top - inset_y),
+                MenuPlacement::AboveAnchor,
+            ),
+            1 => (
+                ScreenPoint::new(center_x, rect.bottom + inset_y - anchor_height),
+                MenuPlacement::BelowAnchor,
+            ),
+            2 => (
+                ScreenPoint::new(rect.right + inset_x - anchor_width, center_y),
+                MenuPlacement::RightOfAnchor,
+            ),
+            _ => (
+                ScreenPoint::new(rect.left - inset_x, center_y),
+                MenuPlacement::LeftOfAnchor,
+            ),
+        };
     }
 
     match edge {
@@ -383,7 +379,7 @@ impl<A: Application> ApplicationState<A> {
                         ScreenPoint::new(position.x, position.y),
                         MenuPlacement::AtPoint,
                     ),
-                    |rect| tray_menu_placement(rect, position),
+                    tray_menu_placement,
                 );
                 if self
                     .menu_host
