@@ -9,6 +9,15 @@ pub(super) enum MenuTheme {
     System,
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub(super) enum MenuPlacement {
+    AtPoint,
+    AboveAnchor,
+    BelowAnchor,
+    LeftOfAnchor,
+    RightOfAnchor,
+}
+
 pub(super) struct TransientMenuHost {
     state: Rc<RefCell<TransientMenuState>>,
     _loaded: windows_core::EventRevoker,
@@ -21,6 +30,7 @@ pub(super) struct TransientMenuHandle {
 
 struct TransientMenuState {
     theme: Rc<MenuThemeState>,
+    placement: MenuPlacement,
     dispatcher: DispatcherQueue,
     _source: DesktopWindowXamlSource, // Keep this member above `host` to ensure proper drop order
     host: windows_window::Window,
@@ -52,7 +62,15 @@ impl Drop for ActiveMenu {
 }
 
 impl TransientMenuHost {
-    pub(super) fn new(dispatcher: DispatcherQueue, theme: MenuTheme) -> windows_core::Result<Self> {
+    pub(super) fn placement(&self) -> MenuPlacement {
+        self.state.borrow().placement
+    }
+
+    pub(super) fn new(
+        dispatcher: DispatcherQueue,
+        theme: MenuTheme,
+        placement: MenuPlacement,
+    ) -> windows_core::Result<Self> {
         let _coordinates = PhysicalCoordinates::enter()?;
         let root = Grid::new()?;
         let anchor = Grid::new()?;
@@ -107,6 +125,7 @@ impl TransientMenuHost {
 
         let state = Rc::new(RefCell::new(TransientMenuState {
             theme,
+            placement,
             dispatcher,
             _source: source,
             host,
@@ -362,7 +381,7 @@ fn menu_callback(callback: Callback<Key>, live: Rc<Cell<bool>>) -> Callback<Key>
 }
 
 fn show_pending(state: &Rc<RefCell<TransientMenuState>>) -> windows_core::Result<()> {
-    let (theme, dispatcher, host_hwnd, menu, generation) = {
+    let (theme, placement, dispatcher, host_hwnd, menu, generation) = {
         let mut state = state.borrow_mut();
         if !state.loaded || state.menu.is_some() {
             return Ok(());
@@ -372,6 +391,7 @@ fn show_pending(state: &Rc<RefCell<TransientMenuState>>) -> windows_core::Result
         };
         (
             Rc::clone(&state.theme),
+            state.placement,
             state.dispatcher.clone(),
             state.host.hwnd().cast(),
             menu,
@@ -388,7 +408,13 @@ fn show_pending(state: &Rc<RefCell<TransientMenuState>>) -> windows_core::Result
 
         let flyout = MenuFlyout::new()?;
         let flyout_base = flyout.cast::<IFlyoutBase>()?;
-        flyout_base.SetPlacement(FlyoutPlacementMode::BottomEdgeAlignedLeft)?;
+        flyout_base.SetPlacement(match placement {
+            MenuPlacement::AtPoint => FlyoutPlacementMode::BottomEdgeAlignedLeft,
+            MenuPlacement::AboveAnchor => FlyoutPlacementMode::Top,
+            MenuPlacement::BelowAnchor => FlyoutPlacementMode::Bottom,
+            MenuPlacement::LeftOfAnchor => FlyoutPlacementMode::Left,
+            MenuPlacement::RightOfAnchor => FlyoutPlacementMode::Right,
+        })?;
         flyout_base.SetShouldConstrainToRootBounds(false)?;
         flyout_base.SetXamlRoot(&anchor.cast::<IUIElement>()?.XamlRoot()?)?;
 

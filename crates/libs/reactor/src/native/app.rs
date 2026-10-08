@@ -127,6 +127,7 @@ impl AppContext {
                 *host = Some(TransientMenuHost::new(
                     self.dispatcher.clone(),
                     MenuTheme::Application,
+                    MenuPlacement::AtPoint,
                 )?);
             }
             Ok::<_, windows_core::Error>(host.as_ref().unwrap().handle())

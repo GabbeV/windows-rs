@@ -24,7 +24,6 @@ const ICON_ID: u32 = 1;
 pub type Point = POINT;
 
 /// A rectangle in screen coordinates.
-#[cfg(test)]
 pub type Rect = RECT;
 
 /// Native work to enqueue for the application's guarded drain.
@@ -244,7 +243,6 @@ impl NotifyIcon {
     /// Returns the Shell's current icon anchor rectangle in screen coordinates.
     ///
     /// For an icon hidden in the overflow area, Windows may return the overflow button rectangle.
-    #[cfg(test)]
     pub fn rect(&self) -> Result<Rect> {
         let value = icon_rect(self.callback_window.hwnd())?;
         Ok(Rect {
@@ -367,7 +365,6 @@ fn allow_message(hwnd: *mut core::ffi::c_void, message: u32) -> Result<()> {
     }
 }
 
-#[cfg(test)]
 fn icon_rect(hwnd: *mut core::ffi::c_void) -> Result<RECT> {
     let identifier = NOTIFYICONIDENTIFIER {
         cbSize: size_of::<NOTIFYICONIDENTIFIER>() as u32,

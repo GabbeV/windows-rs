@@ -79,8 +79,16 @@ fn system_menu_theme_updates_live_and_propagates_errors() {
     let finished = Rc::clone(&completed);
     let error = App::run_with(move |_| {
         let dispatcher = DispatcherQueue::GetForCurrentThread()?;
-        let host = TransientMenuHost::new(dispatcher.clone(), MenuTheme::System)?;
-        let default = TransientMenuHost::new(dispatcher.clone(), MenuTheme::Application)?;
+        let host = TransientMenuHost::new(
+            dispatcher.clone(),
+            MenuTheme::System,
+            MenuPlacement::AboveAnchor,
+        )?;
+        let default = TransientMenuHost::new(
+            dispatcher.clone(),
+            MenuTheme::Application,
+            MenuPlacement::AtPoint,
+        )?;
         let default_theme = default.state.borrow().theme.anchor.ActualTheme()?;
         default
             .state
@@ -160,8 +168,11 @@ fn system_menu_theme_updates_live_and_propagates_errors() {
                     3 => {
                         assert_eq!(theme.applied.get(), ElementTheme::Default);
                         assert_theme(&state.borrow(), default_theme);
-                        let retiring =
-                            TransientMenuHost::new(dispatcher.clone(), MenuTheme::System)?;
+                        let retiring = TransientMenuHost::new(
+                            dispatcher.clone(),
+                            MenuTheme::System,
+                            MenuPlacement::AboveAnchor,
+                        )?;
                         let count = Rc::clone(&retired_reads);
                         retiring
                             .state

@@ -1,7 +1,79 @@
 use super::*;
 use crate::Application;
 use crate::component::ApplicationMessages;
-use crate::native::notifyicon::{NotifyIcon as NativeIcon, NotifyIconEvent};
+use crate::native::notifyicon::{NotifyIcon as NativeIcon, NotifyIconEvent, Rect as IconRect};
+
+windows_core::link!("shcore.dll" "system" fn GetDpiForMonitor(monitor: HMONITOR, dpi_type: i32, dpi_x: *mut u32, dpi_y: *mut u32) -> HRESULT);
+
+// Matches Explorer's ContextMenuMargin resource in SystemTrayResources.xbf.
+const CONTEXT_MENU_MARGIN_DIP: u32 = 12;
+const FLYOUT_MARGIN_DIP: u32 = 4;
+
+fn tray_menu_placement(icon: IconRect) -> (ScreenPoint, MenuPlacement) {
+    let rect = RECT {
+        left: icon.left,
+        top: icon.top,
+        right: icon.right,
+        bottom: icon.bottom,
+    };
+    let center_x = rect.left + (rect.right - rect.left) / 2;
+    let center_y = rect.top + (rect.bottom - rect.top) / 2;
+    let monitor = unsafe { MonitorFromRect(&rect, MONITOR_DEFAULTTONEAREST as u32) };
+    let mut info = MONITORINFO {
+        cbSize: size_of::<MONITORINFO>() as u32,
+        ..Default::default()
+    };
+    if monitor.is_null() || !unsafe { GetMonitorInfoW(monitor, &mut info) }.as_bool() {
+        return (
+            ScreenPoint::new(center_x, rect.top),
+            MenuPlacement::AboveAnchor,
+        );
+    }
+
+    let mut dpi_x = 96;
+    let mut dpi_y = 96;
+    if unsafe { GetDpiForMonitor(monitor, 0, &mut dpi_x, &mut dpi_y) }.is_err() {
+        dpi_x = 96;
+        dpi_y = 96;
+    }
+    // WinUI FlyoutBase adds its own margin between the anchor and menu surface.
+    let anchor_inset_dip = CONTEXT_MENU_MARGIN_DIP - FLYOUT_MARGIN_DIP;
+    let inset_x = ((anchor_inset_dip * dpi_x + 48) / 96) as i32;
+    let inset_y = ((anchor_inset_dip * dpi_y + 48) / 96) as i32;
+    let anchor_width = ((dpi_x + 48) / 96) as i32;
+    let anchor_height = ((dpi_y + 48) / 96) as i32;
+    let work = info.rcWork;
+    let distances = [
+        (i64::from(center_y) - i64::from(work.bottom)).abs(),
+        (i64::from(center_y) - i64::from(work.top)).abs(),
+        (i64::from(center_x) - i64::from(work.left)).abs(),
+        (i64::from(center_x) - i64::from(work.right)).abs(),
+    ];
+    match distances
+        .iter()
+        .enumerate()
+        .min_by_key(|(_, distance)| *distance)
+        .unwrap()
+        .0
+    {
+        0 => (
+            ScreenPoint::new(center_x, work.bottom - inset_y),
+            MenuPlacement::AboveAnchor,
+        ),
+        1 => (
+            ScreenPoint::new(center_x, work.top + inset_y - anchor_height),
+            MenuPlacement::BelowAnchor,
+        ),
+        2 => (
+            ScreenPoint::new(work.left + inset_x - anchor_width, center_y),
+            MenuPlacement::RightOfAnchor,
+        ),
+        _ => (
+            ScreenPoint::new(work.right - inset_x, center_y),
+            MenuPlacement::LeftOfAnchor,
+        ),
+    }
+}
 
 struct ApplicationHost<A: Application> {
     state: Rc<RefCell<Option<ApplicationState<A>>>>,
@@ -272,6 +344,15 @@ impl<A: Application> ApplicationState<A> {
                     return Ok(());
                 };
                 let menu = menu.clone();
+                // Keep the menu at the taskbar edge regardless of where the icon was clicked.
+                // The Shell may return the overflow button bounds for an overflowed icon.
+                let (anchor, placement) = icon.native.rect().map_or(
+                    (
+                        ScreenPoint::new(position.x, position.y),
+                        MenuPlacement::AtPoint,
+                    ),
+                    tray_menu_placement,
+                );
                 if self
                     .menu_host
                     .as_ref()
@@ -284,17 +365,22 @@ impl<A: Application> ApplicationState<A> {
                         self.dismiss_menu(&owner)?;
                     }
                 }
-                if self.menu_host.is_none() {
+                if self
+                    .menu_host
+                    .as_ref()
+                    .is_none_or(|host| host.placement() != placement)
+                {
                     self.menu_host = Some(TransientMenuHost::new(
                         self.application.state.borrow().context.dispatcher.clone(),
                         MenuTheme::System,
+                        placement,
                     )?);
                 }
                 self.menu_host
                     .as_ref()
                     .unwrap()
                     .handle()
-                    .show(ScreenPoint::new(position.x, position.y), menu)?;
+                    .show(anchor, menu)?;
                 self.menu_owner = Some(event.key);
             }
             NotifyIconEvent::Recover => icon.native.recover()?,
