@@ -291,6 +291,8 @@ struct GeneratedPasswordBox {
 }
 struct GeneratedNumberBox {
     value: native::NumberBox,
+    is_clear_button_visible: Rc<Cell<bool>>,
+    _clear_button_loaded: GeneratedRevoker,
     value_changed: Rc<RefCell<NativeOptionalF64Event>>,
     _value_changed: GeneratedRevoker,
 }
@@ -1595,6 +1597,20 @@ impl GeneratedHandle {
             }
             ObjectType::NumberBox => {
                 let value = native::NumberBox::new()?;
+                let is_clear_button_visible = Rc::new(Cell::new(false));
+                let source = value.clone();
+                let visible = Rc::clone(&is_clear_button_visible);
+                let revoker = value
+                    .cast::<native::IFrameworkElement>()?
+                    .Loaded(move |_, _| {
+                        if !visible.get() {
+                            if let Err(error) = set_number_box_clear_button_visible(&source, false)
+                            {
+                                report_error(error.into());
+                            }
+                        }
+                    })?;
+                let _clear_button_loaded = GeneratedRevoker::Event(revoker);
                 let source_value_changed = value.clone();
                 let read_value_changed = move || source_value_changed.Value().map(number_box_value);
                 let value_changed = Rc::new(RefCell::new(NativeOptionalF64Event::default()));
@@ -1643,6 +1659,8 @@ impl GeneratedHandle {
                 let _value_changed = GeneratedRevoker::Event(revoker);
                 Self::NumberBox(Box::new(GeneratedNumberBox {
                     value,
+                    is_clear_button_visible,
+                    _clear_button_loaded,
                     value_changed,
                     _value_changed,
                 }))
@@ -6026,6 +6044,24 @@ impl GeneratedHandle {
                     })
                     .map_err(Into::into),
             ),
+            (Self::NumberBox(object), PropertyId::IsClearButtonVisible, None) => Some({
+                object.is_clear_button_visible.set(true);
+                if let Err(error) = set_number_box_clear_button_visible(&object.value, true) {
+                    report_error(error.into());
+                }
+                Ok(())
+            }),
+            (
+                Self::NumberBox(object),
+                PropertyId::IsClearButtonVisible,
+                Some(PropertyValue::Bool(value)),
+            ) => Some({
+                object.is_clear_button_visible.set(*value);
+                if let Err(error) = set_number_box_clear_button_visible(&object.value, *value) {
+                    report_error(error.into());
+                }
+                Ok(())
+            }),
             (Self::NavigationView(object), PropertyId::IsEnabled, None) => Some(
                 object
                     .value

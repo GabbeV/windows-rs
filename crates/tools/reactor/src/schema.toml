@@ -825,6 +825,12 @@ validation = "finite_positive"
 [[objects.properties]]
 name = "SpinButtonPlacementMode"
 
+[[objects.properties]]
+name = "IsClearButtonVisible"
+value = "Bool"
+adapter = "number_box_clear_button"
+default = "true"
+
 [[objects.relations]]
 name = "Header"
 

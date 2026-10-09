@@ -149,6 +149,7 @@ pub enum PropertyId {
     IsBackEnabled,
     IsCalendarOpen,
     IsChecked,
+    IsClearButtonVisible,
     IsClosable,
     IsColorChannelTextInputVisible,
     IsColorSliderVisible,
@@ -1508,6 +1509,10 @@ pub fn property_contract(kind: ObjectType, id: PropertyId) -> Option<PropertyCon
                 variants: &["Hidden", "Compact", "Inline"],
             },
         }),
+        (ObjectType::NumberBox, PropertyId::IsClearButtonVisible) => Some(PropertyContract {
+            id,
+            value: ValueType::Bool,
+        }),
         (ObjectType::NavigationView, PropertyId::PaneDisplayMode) => Some(PropertyContract {
             id,
             value: ValueType::Enum {
@@ -2456,6 +2461,7 @@ pub(crate) fn property_order(kind: ObjectType, id: PropertyId) -> usize {
         (ObjectType::NumberBox, PropertyId::Value) => 29,
         (ObjectType::NumberBox, PropertyId::SmallChange) => 30,
         (ObjectType::NumberBox, PropertyId::SpinButtonPlacementMode) => 31,
+        (ObjectType::NumberBox, PropertyId::IsClearButtonVisible) => 32,
         (ObjectType::NavigationView, PropertyId::IsEnabled) => 26,
         (ObjectType::NavigationView, PropertyId::PaneDisplayMode) => 27,
         (ObjectType::NavigationView, PropertyId::IsPaneToggleButtonVisible) => 28,
@@ -2768,6 +2774,7 @@ pub(crate) const ALL_PROPERTY_IDS: &[PropertyId] = &[
     PropertyId::IsBackEnabled,
     PropertyId::IsCalendarOpen,
     PropertyId::IsChecked,
+    PropertyId::IsClearButtonVisible,
     PropertyId::IsClosable,
     PropertyId::IsColorChannelTextInputVisible,
     PropertyId::IsColorSliderVisible,

@@ -118,6 +118,60 @@ impl Drop for PropertyChangedRevoker {
     }
 }
 
+fn find_named_descendant(
+    root: &native::DependencyObject,
+    name: &str,
+    depth: usize,
+) -> Result<Option<native::DependencyObject>, WinUiError> {
+    if depth == 0 {
+        return Ok(None);
+    }
+    for index in 0..native::VisualTreeHelper::GetChildrenCount(root)? {
+        let child = native::VisualTreeHelper::GetChild(root, index)?;
+        if child
+            .cast::<native::IFrameworkElement>()
+            .is_ok_and(|element| element.Name().is_ok_and(|candidate| candidate == name))
+        {
+            return Ok(Some(child));
+        }
+        if let Some(found) = find_named_descendant(&child, name, depth - 1)? {
+            return Ok(Some(found));
+        }
+    }
+    Ok(None)
+}
+
+fn set_number_box_clear_button_visible(
+    number_box: &native::NumberBox,
+    visible: bool,
+) -> Result<(), WinUiError> {
+    let root = number_box.cast::<native::DependencyObject>()?;
+    let Some(input) = find_named_descendant(&root, "InputBox", 16)? else {
+        return Ok(());
+    };
+    if input.cast::<native::TextBox>().is_err() {
+        return Ok(());
+    }
+    let Some(button) = find_named_descendant(&input, "DeleteButton", 16)? else {
+        return Ok(());
+    };
+    if button.cast::<native::Button>().is_err() {
+        return Ok(());
+    }
+    let element = button.cast::<native::IFrameworkElement>()?;
+    if visible {
+        button.ClearValue(&native::FrameworkElement::WidthProperty()?)?;
+        button.ClearValue(&native::FrameworkElement::MinWidthProperty()?)?;
+    } else {
+        // NumberBox's TextBox animates DeleteButton.Visibility and gives it a 40-DIP
+        // minimum width. Remove its layout width instead until WinUI exposes the
+        // property requested in https://github.com/microsoft/microsoft-ui-xaml/issues/3158.
+        element.SetMinWidth(0.0)?;
+        element.SetWidth(0.0)?;
+    }
+    Ok(())
+}
+
 include!("generated.rs");
 
 struct QueuedEvent {

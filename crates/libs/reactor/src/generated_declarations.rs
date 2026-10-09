@@ -3564,6 +3564,13 @@ impl NumberBox {
         );
         self
     }
+    pub fn is_clear_button_visible(mut self, is_clear_button_visible: bool) -> Self {
+        self.0 = self.0.property(
+            PropertyId::IsClearButtonVisible,
+            PropertyValue::Bool(is_clear_button_visible),
+        );
+        self
+    }
     focus_methods!(NumberBox);
     visual_methods!();
     /// Rejects values outside this relation's generated type contract.

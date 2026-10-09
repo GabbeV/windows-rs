@@ -182,6 +182,7 @@ enum PropertyAdapter {
     InspectableStringList,
     KeyAccelerators,
     NativeColor,
+    NumberBoxClearButton,
     NumberBoxValue,
     PathData,
     PointerCapture,
@@ -210,6 +211,7 @@ impl PropertyAdapter {
             Self::InspectableStringList => "StringList",
             Self::KeyAccelerators => "KeyAccelerators",
             Self::NativeColor => "Color",
+            Self::NumberBoxClearButton => "Bool",
             Self::NumberBoxValue | Self::RatingValue => "OptionalF64",
             Self::PointerCapture | Self::PointerFocus => "Bool",
             Self::ResourceOverrides => "ResourceOverrides",
@@ -235,7 +237,10 @@ impl PropertyAdapter {
     fn has_managed_state(self) -> bool {
         matches!(
             self,
-            Self::PointerCapture | Self::PointerFocus | Self::DropPolicy
+            Self::PointerCapture
+                | Self::PointerFocus
+                | Self::DropPolicy
+                | Self::NumberBoxClearButton
         )
     }
 
@@ -885,6 +890,9 @@ fn generate_native(schema: &Schema, metadata: &tool_reactor_metadata::MetadataRe
                     output.push_str(&format!("{field}: Rc<Cell<bool>>,\n"));
                 }
             }
+            if object.name == "NumberBox" {
+                output.push_str("_clear_button_loaded: GeneratedRevoker,\n");
+            }
             for event in &object.events {
                 output.push_str(&format!(
                     "{}: Rc<RefCell<Native{}Event>>,\n_{}: GeneratedRevoker,\n",
@@ -1039,6 +1047,20 @@ fn generate_native(schema: &Schema, metadata: &tool_reactor_metadata::MetadataRe
                 } else {
                     output.push_str(&format!("let {field} = Rc::new(Cell::new(false));\n"));
                 }
+            }
+            if object.name == "NumberBox" {
+                output.push_str(
+                    "let source = value.clone();\n\
+                     let visible = Rc::clone(&is_clear_button_visible);\n\
+                     let revoker = value.cast::<native::IFrameworkElement>()?.Loaded(move |_, _| {\n\
+                         if !visible.get() {\n\
+                             if let Err(error) = set_number_box_clear_button_visible(&source, false) {\n\
+                                 report_error(error.into());\n\
+                             }\n\
+                         }\n\
+                     })?;\n\
+                     let _clear_button_loaded = GeneratedRevoker::Event(revoker);\n",
+                );
             }
             for event in &object.events {
                 let field = snake_case(&event.name);
@@ -1530,6 +1552,9 @@ fn generate_native(schema: &Schema, metadata: &tool_reactor_metadata::MetadataRe
                     .is_some_and(PropertyAdapter::has_managed_state)
             }) {
                 output.push_str(&format!("{},", snake_case(&property.name)));
+            }
+            if object.name == "NumberBox" {
+                output.push_str("_clear_button_loaded,");
             }
             for event in &object.events {
                 let field = snake_case(&event.name);
@@ -2149,7 +2174,9 @@ fn generate_native(schema: &Schema, metadata: &tool_reactor_metadata::MetadataRe
             } else {
                 format!("put_{native}")
             };
-            let interface = if property
+            let interface = if property.adapter == Some(PropertyAdapter::NumberBoxClearButton) {
+                "INumberBox"
+            } else if property
                 .adapter
                 .is_some_and(PropertyAdapter::uses_framework_element)
             {
@@ -2382,6 +2409,25 @@ fn emit_native_property_arms(
     metadata: &tool_reactor_metadata::MetadataResolver,
 ) {
     if adapter.is_some_and(PropertyAdapter::uses_framework_element) {
+        return;
+    }
+    if adapter == Some(PropertyAdapter::NumberBoxClearButton) {
+        output.push_str(&format!(
+            "{pattern}None) => Some({{\
+                 object.is_clear_button_visible.set(true);\
+                 if let Err(error) = set_number_box_clear_button_visible(&{target}, true) {{\
+                     report_error(error.into());\
+                 }}\
+                 Ok(())\
+             }}),\n\
+             {pattern}Some(PropertyValue::Bool(value))) => Some({{\
+                 object.is_clear_button_visible.set(*value);\
+                 if let Err(error) = set_number_box_clear_button_visible(&{target}, *value) {{\
+                     report_error(error.into());\
+                 }}\
+                 Ok(())\
+             }}),\n"
+        ));
         return;
     }
     if adapter == Some(PropertyAdapter::Uri) {

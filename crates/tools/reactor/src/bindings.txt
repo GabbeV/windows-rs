@@ -346,7 +346,7 @@ Microsoft::UI::Xaml::IDragUIOverride::{put_Caption, put_IsCaptionVisible}
 Microsoft::UI::Xaml::IElementFactory::{}
 Microsoft::UI::Xaml::IElementFactoryGetArgs::get_Data
 Microsoft::UI::Xaml::IElementFactoryRecycleArgs::get_Element
-Microsoft::UI::Xaml::IFrameworkElement::{add_ActualThemeChanged, add_Loaded, add_SizeChanged, get_ActualHeight, get_ActualTheme, get_ActualWidth, get_IsLoaded, get_MaxHeight, get_MinWidth, get_Resources, get_Tag, put_AllowFocusOnInteraction, put_Height, put_HorizontalAlignment, put_Margin, put_MaxHeight, put_MaxWidth, put_MinHeight, put_MinWidth, put_RequestedTheme, put_Style, put_Tag, put_VerticalAlignment, put_Width, remove_ActualThemeChanged, remove_Loaded, remove_SizeChanged}
+Microsoft::UI::Xaml::IFrameworkElement::{add_ActualThemeChanged, add_Loaded, add_SizeChanged, get_ActualHeight, get_ActualTheme, get_ActualWidth, get_IsLoaded, get_MaxHeight, get_MinWidth, get_Name, get_Resources, get_Tag, put_AllowFocusOnInteraction, put_Height, put_HorizontalAlignment, put_Margin, put_MaxHeight, put_MaxWidth, put_MinHeight, put_MinWidth, put_RequestedTheme, put_Style, put_Tag, put_VerticalAlignment, put_Width, remove_ActualThemeChanged, remove_Loaded, remove_SizeChanged}
 Microsoft::UI::Xaml::IFrameworkElementStatics::{get_AllowFocusOnInteractionProperty, get_HeightProperty, get_HorizontalAlignmentProperty, get_MarginProperty, get_MaxHeightProperty, get_MaxWidthProperty, get_MinHeightProperty, get_MinWidthProperty, get_TagProperty, get_VerticalAlignmentProperty, get_WidthProperty}
 Microsoft::UI::Xaml::Input::ICharacterReceivedRoutedEventArgs::{get_Character, get_KeyStatus, put_Handled}
 Microsoft::UI::Xaml::Input::IKeyboardAccelerator::{Invoked, put_Key, put_Modifiers}
@@ -389,6 +389,7 @@ Microsoft::UI::Xaml::Media::MicaBackdrop::CreateInstance
 Microsoft::UI::Xaml::Media::SolidColorBrush::CreateInstance
 Microsoft::UI::Xaml::Media::Stretch
 Microsoft::UI::Xaml::Media::SystemBackdrop::{}
+Microsoft::UI::Xaml::Media::VisualTreeHelper::{GetChild, GetChildrenCount}
 Microsoft::UI::Xaml::ResourceDictionary::{}
 Microsoft::UI::Xaml::ScalarTransition::CreateInstance
 Microsoft::UI::Xaml::Shapes::Ellipse::CreateInstance
