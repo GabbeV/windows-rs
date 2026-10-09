@@ -164,11 +164,13 @@ fn set_number_box_clear_button_visible(
     if visible {
         button.ClearValue(&native::FrameworkElement::WidthProperty()?)?;
         button.ClearValue(&native::FrameworkElement::MinWidthProperty()?)?;
+        button.ClearValue(&native::FrameworkElement::MaxWidthProperty()?)?;
     } else {
-        // NumberBox's TextBox animates DeleteButton.Visibility and gives it a 40-DIP
-        // minimum width. Remove its layout width instead until WinUI exposes the
+        // NumberBox's TextBox restores DeleteButton.Width during layout. Clamp its
+        // maximum width instead until WinUI exposes the
         // property requested in https://github.com/microsoft/microsoft-ui-xaml/issues/3158.
         element.SetMinWidth(0.0)?;
+        element.SetMaxWidth(0.0)?;
         element.SetWidth(0.0)?;
     }
     Ok(())
