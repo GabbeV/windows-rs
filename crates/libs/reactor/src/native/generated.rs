@@ -4786,6 +4786,35 @@ impl GeneratedHandle {
                             .and_then(|brush| object.SetBackground(&brush).map_err(Into::into))
                     }),
             ),
+            (Self::Button(object), PropertyId::Padding, None) => Some(
+                object
+                    .value
+                    .cast::<native::IDependencyObject>()
+                    .map_err(Into::into)
+                    .and_then(|object| {
+                        native::Control::PaddingProperty()
+                            .map_err(Into::into)
+                            .and_then(|property| object.ClearValue(&property).map_err(Into::into))
+                    }),
+            ),
+            (Self::Button(object), PropertyId::Padding, Some(PropertyValue::Thickness(value))) => {
+                Some(
+                    object
+                        .value
+                        .cast::<native::IControl>()
+                        .map_err(Into::into)
+                        .and_then(|object| {
+                            object
+                                .SetPadding(native::Thickness {
+                                    left: value.left,
+                                    top: value.top,
+                                    right: value.right,
+                                    bottom: value.bottom,
+                                })
+                                .map_err(Into::into)
+                        }),
+                )
+            }
             (Self::Button(object), PropertyId::IsEnabled, None) => Some(
                 object
                     .value
@@ -5952,6 +5981,49 @@ impl GeneratedHandle {
                 object
                     .value
                     .SetValue(native_number_box_value(*value))
+                    .map_err(Into::into),
+            ),
+            (Self::NumberBox(object), PropertyId::SmallChange, None) => Some(
+                object
+                    .value
+                    .cast::<native::IDependencyObject>()
+                    .map_err(Into::into)
+                    .and_then(|object| {
+                        native::NumberBox::SmallChangeProperty()
+                            .map_err(Into::into)
+                            .and_then(|property| object.ClearValue(&property).map_err(Into::into))
+                    }),
+            ),
+            (Self::NumberBox(object), PropertyId::SmallChange, Some(PropertyValue::F64(value))) => {
+                Some(object.value.SetSmallChange(*value).map_err(Into::into))
+            }
+            (Self::NumberBox(object), PropertyId::SpinButtonPlacementMode, None) => Some(
+                object
+                    .value
+                    .cast::<native::IDependencyObject>()
+                    .map_err(Into::into)
+                    .and_then(|object| {
+                        native::NumberBox::SpinButtonPlacementModeProperty()
+                            .map_err(Into::into)
+                            .and_then(|property| object.ClearValue(&property).map_err(Into::into))
+                    }),
+            ),
+            (
+                Self::NumberBox(object),
+                PropertyId::SpinButtonPlacementMode,
+                Some(PropertyValue::Enum {
+                    kind: "NumberBoxSpinButtonPlacementMode",
+                    variant,
+                }),
+            ) => Some(
+                object
+                    .value
+                    .SetSpinButtonPlacementMode(match *variant {
+                        "Hidden" => native::NumberBoxSpinButtonPlacementMode::Hidden,
+                        "Compact" => native::NumberBoxSpinButtonPlacementMode::Compact,
+                        "Inline" => native::NumberBoxSpinButtonPlacementMode::Inline,
+                        _ => unreachable!("validated enum variant"),
+                    })
                     .map_err(Into::into),
             ),
             (Self::NavigationView(object), PropertyId::IsEnabled, None) => Some(

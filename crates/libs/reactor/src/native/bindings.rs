@@ -2554,6 +2554,16 @@ impl Control {
             .and_then(|| windows_core::imp::Type::from_abi(result__))
         })
     }
+    pub(crate) fn PaddingProperty() -> windows_core::Result<DependencyProperty> {
+        Self::IControlStatics(|this| unsafe {
+            let mut result__ = core::mem::zeroed();
+            (windows_core::Interface::vtable(this).PaddingProperty)(
+                windows_core::Interface::as_raw(this),
+                &mut result__,
+            )
+            .and_then(|| windows_core::imp::Type::from_abi(result__))
+        })
+    }
     pub(crate) fn HorizontalContentAlignmentProperty() -> windows_core::Result<DependencyProperty> {
         Self::IControlStatics(|this| unsafe {
             let mut result__ = core::mem::zeroed();
@@ -8393,6 +8403,15 @@ impl IControl {
             .ok()
         }
     }
+    pub(crate) fn SetPadding(&self, value: Thickness) -> windows_core::Result<()> {
+        unsafe {
+            (windows_core::Interface::vtable(self).SetPadding)(
+                windows_core::Interface::as_raw(self),
+                value,
+            )
+            .ok()
+        }
+    }
     pub(crate) fn SetHorizontalContentAlignment(
         &self,
         value: HorizontalAlignment,
@@ -8485,7 +8504,8 @@ pub struct IControl_Vtbl {
     Template: usize,
     SetTemplate: usize,
     Padding: usize,
-    SetPadding: usize,
+    pub SetPadding:
+        unsafe extern "system" fn(*mut core::ffi::c_void, Thickness) -> windows_core::HRESULT,
     HorizontalContentAlignment: usize,
     pub SetHorizontalContentAlignment: unsafe extern "system" fn(
         *mut core::ffi::c_void,
@@ -8541,7 +8561,10 @@ pub struct IControlStatics_Vtbl {
     ) -> windows_core::HRESULT,
     TabNavigationProperty: usize,
     TemplateProperty: usize,
-    PaddingProperty: usize,
+    pub PaddingProperty: unsafe extern "system" fn(
+        *mut core::ffi::c_void,
+        *mut *mut core::ffi::c_void,
+    ) -> windows_core::HRESULT,
     pub HorizontalContentAlignmentProperty: unsafe extern "system" fn(
         *mut core::ffi::c_void,
         *mut *mut core::ffi::c_void,
@@ -13838,6 +13861,15 @@ impl INumberBox {
             .ok()
         }
     }
+    pub(crate) fn SetSmallChange(&self, value: f64) -> windows_core::Result<()> {
+        unsafe {
+            (windows_core::Interface::vtable(self).SetSmallChange)(
+                windows_core::Interface::as_raw(self),
+                value,
+            )
+            .ok()
+        }
+    }
     pub(crate) fn SetHeader<P0>(&self, value: P0) -> windows_core::Result<()>
     where
         P0: windows_core::Param<windows_core::IInspectable>,
@@ -13846,6 +13878,18 @@ impl INumberBox {
             (windows_core::Interface::vtable(self).SetHeader)(
                 windows_core::Interface::as_raw(self),
                 value.param().abi(),
+            )
+            .ok()
+        }
+    }
+    pub(crate) fn SetSpinButtonPlacementMode(
+        &self,
+        value: NumberBoxSpinButtonPlacementMode,
+    ) -> windows_core::Result<()> {
+        unsafe {
+            (windows_core::Interface::vtable(self).SetSpinButtonPlacementMode)(
+                windows_core::Interface::as_raw(self),
+                value,
             )
             .ok()
         }
@@ -13894,7 +13938,8 @@ pub struct INumberBox_Vtbl {
     pub Value: unsafe extern "system" fn(*mut core::ffi::c_void, *mut f64) -> windows_core::HRESULT,
     pub SetValue: unsafe extern "system" fn(*mut core::ffi::c_void, f64) -> windows_core::HRESULT,
     SmallChange: usize,
-    SetSmallChange: usize,
+    pub SetSmallChange:
+        unsafe extern "system" fn(*mut core::ffi::c_void, f64) -> windows_core::HRESULT,
     LargeChange: usize,
     SetLargeChange: usize,
     Text: usize,
@@ -13921,7 +13966,10 @@ pub struct INumberBox_Vtbl {
     ValidationMode: usize,
     SetValidationMode: usize,
     SpinButtonPlacementMode: usize,
-    SetSpinButtonPlacementMode: usize,
+    pub SetSpinButtonPlacementMode: unsafe extern "system" fn(
+        *mut core::ffi::c_void,
+        NumberBoxSpinButtonPlacementMode,
+    ) -> windows_core::HRESULT,
     IsWrapEnabled: usize,
     SetIsWrapEnabled: usize,
     AcceptsExpression: usize,
@@ -13976,6 +14024,25 @@ pub struct INumberBoxStatics_Vtbl {
         *mut *mut core::ffi::c_void,
     ) -> windows_core::HRESULT,
     pub ValueProperty: unsafe extern "system" fn(
+        *mut core::ffi::c_void,
+        *mut *mut core::ffi::c_void,
+    ) -> windows_core::HRESULT,
+    pub SmallChangeProperty: unsafe extern "system" fn(
+        *mut core::ffi::c_void,
+        *mut *mut core::ffi::c_void,
+    ) -> windows_core::HRESULT,
+    LargeChangeProperty: usize,
+    TextProperty: usize,
+    HeaderProperty: usize,
+    HeaderTemplateProperty: usize,
+    PlaceholderTextProperty: usize,
+    SelectionFlyoutProperty: usize,
+    SelectionHighlightColorProperty: usize,
+    TextReadingOrderProperty: usize,
+    PreventKeyboardDisplayOnProgrammaticFocusProperty: usize,
+    DescriptionProperty: usize,
+    ValidationModeProperty: usize,
+    pub SpinButtonPlacementModeProperty: unsafe extern "system" fn(
         *mut core::ffi::c_void,
         *mut *mut core::ffi::c_void,
     ) -> windows_core::HRESULT,
@@ -25340,6 +25407,26 @@ impl NumberBox {
             .and_then(|| windows_core::imp::Type::from_abi(result__))
         })
     }
+    pub(crate) fn SmallChangeProperty() -> windows_core::Result<DependencyProperty> {
+        Self::INumberBoxStatics(|this| unsafe {
+            let mut result__ = core::mem::zeroed();
+            (windows_core::Interface::vtable(this).SmallChangeProperty)(
+                windows_core::Interface::as_raw(this),
+                &mut result__,
+            )
+            .and_then(|| windows_core::imp::Type::from_abi(result__))
+        })
+    }
+    pub(crate) fn SpinButtonPlacementModeProperty() -> windows_core::Result<DependencyProperty> {
+        Self::INumberBoxStatics(|this| unsafe {
+            let mut result__ = core::mem::zeroed();
+            (windows_core::Interface::vtable(this).SpinButtonPlacementModeProperty)(
+                windows_core::Interface::as_raw(this),
+                &mut result__,
+            )
+            .and_then(|| windows_core::imp::Type::from_abi(result__))
+        })
+    }
     fn INumberBoxFactory<R, F: FnOnce(&INumberBoxFactory) -> windows_core::Result<R>>(
         callback: F,
     ) -> windows_core::Result<R> {
@@ -25374,6 +25461,22 @@ impl windows_core::RuntimeName for NumberBox {
 }
 unsafe impl Send for NumberBox {}
 unsafe impl Sync for NumberBox {}
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct NumberBoxSpinButtonPlacementMode(pub i32);
+impl NumberBoxSpinButtonPlacementMode {
+    pub const Hidden: Self = Self(0);
+    pub const Compact: Self = Self(1);
+    pub const Inline: Self = Self(2);
+}
+impl windows_core::imp::TypeKind for NumberBoxSpinButtonPlacementMode {
+    type TypeKind = windows_core::imp::CopyType;
+}
+impl windows_core::RuntimeType for NumberBoxSpinButtonPlacementMode {
+    const SIGNATURE: windows_core::imp::ConstBuffer = windows_core::imp::ConstBuffer::from_slice(
+        b"enum(Microsoft.UI.Xaml.Controls.NumberBoxSpinButtonPlacementMode;i4)",
+    );
+}
 #[repr(transparent)]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct NumberBoxValueChangedEventArgs(windows_core::IUnknown);

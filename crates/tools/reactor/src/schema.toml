@@ -218,6 +218,10 @@ name = "Background"
 adapter = "theme_brush"
 
 [[objects.properties]]
+name = "Padding"
+validation = "finite_non_negative"
+
+[[objects.properties]]
 name = "IsEnabled"
 
 [[objects.properties]]
@@ -813,6 +817,13 @@ name = "Value"
 adapter = "number_box_value"
 controlled = "ValueChanged"
 feedback = "normalized"
+
+[[objects.properties]]
+name = "SmallChange"
+validation = "finite_positive"
+
+[[objects.properties]]
+name = "SpinButtonPlacementMode"
 
 [[objects.relations]]
 name = "Header"

@@ -211,6 +211,31 @@ impl NavigationViewPaneDisplayMode {
 }
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum NumberBoxSpinButtonPlacementMode {
+    Hidden,
+    Compact,
+    Inline,
+}
+impl NumberBoxSpinButtonPlacementMode {
+    pub(crate) fn property_value(self) -> PropertyValue {
+        match self {
+            Self::Hidden => PropertyValue::Enum {
+                kind: "NumberBoxSpinButtonPlacementMode",
+                variant: "Hidden",
+            },
+            Self::Compact => PropertyValue::Enum {
+                kind: "NumberBoxSpinButtonPlacementMode",
+                variant: "Compact",
+            },
+            Self::Inline => PropertyValue::Enum {
+                kind: "NumberBoxSpinButtonPlacementMode",
+                variant: "Inline",
+            },
+        }
+    }
+}
+#[non_exhaustive]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Orientation {
     Vertical,
     Horizontal,
@@ -1980,6 +2005,17 @@ impl Button {
         );
         self
     }
+    pub fn padding(mut self, padding: impl Into<Thickness>) -> Self {
+        let padding = padding.into();
+        assert!(
+            padding.is_finite_non_negative(),
+            "Button.Padding requires finite_non_negative"
+        );
+        self.0 = self
+            .0
+            .property(PropertyId::Padding, PropertyValue::Thickness(padding));
+        self
+    }
     pub fn is_enabled(mut self, is_enabled: bool) -> Self {
         self.0 = self
             .0
@@ -3506,6 +3542,26 @@ impl NumberBox {
         self.0 = self
             .0
             .property(PropertyId::Value, PropertyValue::OptionalF64(value.into()));
+        self
+    }
+    pub fn small_change(mut self, small_change: f64) -> Self {
+        assert!(
+            small_change.is_finite() && small_change > 0.0,
+            "NumberBox.SmallChange requires finite_positive"
+        );
+        self.0 = self
+            .0
+            .property(PropertyId::SmallChange, PropertyValue::F64(small_change));
+        self
+    }
+    pub fn spin_button_placement_mode(
+        mut self,
+        spin_button_placement_mode: NumberBoxSpinButtonPlacementMode,
+    ) -> Self {
+        self.0 = self.0.property(
+            PropertyId::SpinButtonPlacementMode,
+            spin_button_placement_mode.property_value(),
+        );
         self
     }
     focus_methods!(NumberBox);
