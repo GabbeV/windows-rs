@@ -1055,7 +1055,8 @@ fn generate_native(schema: &Schema, metadata: &tool_reactor_metadata::MetadataRe
                      let revoker = value.cast::<native::IFrameworkElement>()?.Loaded(move |_, _| {\n\
                          if !visible.get() {\n\
                              if let Err(error) = set_number_box_clear_button_visible(&source, false) {\n\
-                                 report_error(error.into());\n\
+                                 #[cfg(debug_assertions)]\n\
+                                 eprintln!(\"NumberBox clear-button workaround failed: {error:?}\");\n\
                              }\n\
                          }\n\
                      })?;\n\
@@ -2416,14 +2417,16 @@ fn emit_native_property_arms(
             "{pattern}None) => Some({{\
                  object.is_clear_button_visible.set(true);\
                  if let Err(error) = set_number_box_clear_button_visible(&{target}, true) {{\
-                     report_error(error.into());\
+                     #[cfg(debug_assertions)]\
+                     eprintln!(\"NumberBox clear-button workaround failed: {{error:?}}\");\
                  }}\
                  Ok(())\
              }}),\n\
              {pattern}Some(PropertyValue::Bool(value))) => Some({{\
                  object.is_clear_button_visible.set(*value);\
                  if let Err(error) = set_number_box_clear_button_visible(&{target}, *value) {{\
-                     report_error(error.into());\
+                     #[cfg(debug_assertions)]\
+                     eprintln!(\"NumberBox clear-button workaround failed: {{error:?}}\");\
                  }}\
                  Ok(())\
              }}),\n"

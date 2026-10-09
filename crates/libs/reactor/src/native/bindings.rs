@@ -8469,6 +8469,16 @@ impl IControl {
             .ok()
         }
     }
+    pub(crate) fn ApplyTemplate(&self) -> windows_core::Result<bool> {
+        unsafe {
+            let mut result__ = core::mem::zeroed();
+            (windows_core::Interface::vtable(self).ApplyTemplate)(
+                windows_core::Interface::as_raw(self),
+                &mut result__,
+            )
+            .map(|| result__)
+        }
+    }
 }
 #[repr(C)]
 pub struct IControl_Vtbl {
@@ -8531,6 +8541,21 @@ pub struct IControl_Vtbl {
         *mut core::ffi::c_void,
         *mut core::ffi::c_void,
     ) -> windows_core::HRESULT,
+    DefaultStyleResourceUri: usize,
+    SetDefaultStyleResourceUri: usize,
+    ElementSoundMode: usize,
+    SetElementSoundMode: usize,
+    CornerRadius: usize,
+    SetCornerRadius: usize,
+    FocusEngaged: usize,
+    RemoveFocusEngaged: usize,
+    FocusDisengaged: usize,
+    RemoveFocusDisengaged: usize,
+    IsEnabledChanged: usize,
+    RemoveIsEnabledChanged: usize,
+    RemoveFocusEngagement: usize,
+    pub ApplyTemplate:
+        unsafe extern "system" fn(*mut core::ffi::c_void, *mut bool) -> windows_core::HRESULT,
 }
 windows_core::imp::define_interface!(
     IControlStatics,

@@ -1606,7 +1606,8 @@ impl GeneratedHandle {
                         if !visible.get() {
                             if let Err(error) = set_number_box_clear_button_visible(&source, false)
                             {
-                                report_error(error.into());
+                                #[cfg(debug_assertions)]
+                                eprintln!("NumberBox clear-button workaround failed: {error:?}");
                             }
                         }
                     })?;
@@ -6047,7 +6048,8 @@ impl GeneratedHandle {
             (Self::NumberBox(object), PropertyId::IsClearButtonVisible, None) => Some({
                 object.is_clear_button_visible.set(true);
                 if let Err(error) = set_number_box_clear_button_visible(&object.value, true) {
-                    report_error(error.into());
+                    #[cfg(debug_assertions)]
+                    eprintln!("NumberBox clear-button workaround failed: {error:?}");
                 }
                 Ok(())
             }),
@@ -6058,7 +6060,8 @@ impl GeneratedHandle {
             ) => Some({
                 object.is_clear_button_visible.set(*value);
                 if let Err(error) = set_number_box_clear_button_visible(&object.value, *value) {
-                    report_error(error.into());
+                    #[cfg(debug_assertions)]
+                    eprintln!("NumberBox clear-button workaround failed: {error:?}");
                 }
                 Ok(())
             }),

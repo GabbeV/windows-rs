@@ -145,6 +145,7 @@ fn set_number_box_clear_button_visible(
     number_box: &native::NumberBox,
     visible: bool,
 ) -> Result<(), WinUiError> {
+    number_box.cast::<native::IControl>()?.ApplyTemplate()?;
     let root = number_box.cast::<native::DependencyObject>()?;
     let Some(input) = find_named_descendant(&root, "InputBox", 16)? else {
         return Ok(());
@@ -152,6 +153,7 @@ fn set_number_box_clear_button_visible(
     if input.cast::<native::TextBox>().is_err() {
         return Ok(());
     }
+    input.cast::<native::IControl>()?.ApplyTemplate()?;
     let Some(button) = find_named_descendant(&input, "DeleteButton", 16)? else {
         return Ok(());
     };

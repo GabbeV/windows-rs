@@ -97,7 +97,7 @@ Microsoft::UI::Xaml::Controls::IContentControl::put_Content
 Microsoft::UI::Xaml::Controls::IContentDialog::{add_Closed, Hide, put_CloseButtonText, put_IsPrimaryButtonEnabled, put_IsSecondaryButtonEnabled, put_PrimaryButtonText, put_SecondaryButtonText, put_Title, remove_Closed, ShowAsync}
 Microsoft::UI::Xaml::Controls::IContentDialogClosedEventArgs::get_Result
 Microsoft::UI::Xaml::Controls::IContentDialogStatics::{get_CloseButtonTextProperty, get_IsPrimaryButtonEnabledProperty, get_IsSecondaryButtonEnabledProperty, get_PrimaryButtonTextProperty, get_SecondaryButtonTextProperty, get_TitleProperty}
-Microsoft::UI::Xaml::Controls::IControl::{get_IsEnabled, put_Background, put_BorderBrush, put_BorderThickness, put_HorizontalContentAlignment, put_IsEnabled, put_Padding, put_VerticalContentAlignment}
+Microsoft::UI::Xaml::Controls::IControl::{ApplyTemplate, get_IsEnabled, put_Background, put_BorderBrush, put_BorderThickness, put_HorizontalContentAlignment, put_IsEnabled, put_Padding, put_VerticalContentAlignment}
 Microsoft::UI::Xaml::Controls::IControlStatics::{get_BackgroundProperty, get_BorderBrushProperty, get_BorderThicknessProperty, get_HorizontalContentAlignmentProperty, get_IsEnabledProperty, get_PaddingProperty, get_VerticalContentAlignmentProperty}
 Microsoft::UI::Xaml::Controls::IDatePicker::{add_SelectedDateChanged, put_DayVisible, put_Header, put_MonthVisible, put_YearVisible, remove_SelectedDateChanged}
 Microsoft::UI::Xaml::Controls::IDatePickerSelectedValueChangedEventArgs::get_NewDate
